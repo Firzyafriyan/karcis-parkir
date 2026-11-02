@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10183c">
+  <title>Generator Karcis Parkir</title>
+  <style>
+    :root {
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: #171717;
+      background: #f3f3f3;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; }
+
+    .app-header {
+      padding: 28px max(24px, calc((100% - 1120px) / 2));
+      color: #fff;
+      background: #171717;
+    }
+
+    .app-header h1 { margin: 0 0 6px; font-size: 24px; }
+    .app-header p { margin: 0; color: #ddd; font-size: 14px; }
+    main { max-width: 1120px; margin: 28px auto; padding: 0 24px; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(150px, 1fr)) auto auto;
+      align-items: end;
+      gap: 14px;
+      padding: 20px;
+      border: 1px solid #dedede;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 5px 20px #0000000a;
+    }
+
+    label { display: grid; gap: 7px; color: #4a4a4a; font-size: 13px; font-weight: 650; }
+
+    input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 11px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      color: #171717;
+      background: #fff;
+      font: inherit;
+      font-size: 14px;
+    }
+
+    input:focus { outline: 3px solid #17171729; border-color: #171717; }
+    button {
+      min-height: 42px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 8px;
+      color: #fff;
+      background: #171717;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    button:hover { background: #3a3a3a; }
+    button.secondary { color: #171717; background: #e8e8e8; }
+    button.secondary:hover { background: #ddd; }
+
+    .status { min-height: 24px; margin: 16px 2px; color: #535353; font-size: 14px; }
+    .tickets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 16px; }
+
+    .ticket {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(170px, 1fr);
+      min-height: 188px;
+      overflow: hidden;
+      border: 2px solid #171717;
+      border-radius: 16px;
+      color: #171717;
+      background: #fff;
+      box-shadow: 0 4px 12px #00000012;
+      break-inside: avoid;
+    }
+
+    .ticket-main {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      padding: 16px 18px 12px;
+      text-align: center;
+    }
+
+    .ticket-main::before,
+    .ticket-main::after {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 13px;
+      content: "";
+      background: radial-gradient(circle at center, #f3f5fa 4px, transparent 4.5px) center top / 13px 15px repeat-y;
+    }
+
+    .ticket-main::before { left: -7px; }
+    .ticket-main::after { right: -7px; }
+    .event-label {
+      margin: 0;
+      padding: 4px 13px;
+      border-radius: 20px;
+      color: #fff;
+      background: #171717;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .ticket-title {
+      margin: 0;
+      padding: 2px 10px;
+      border: 3px solid #171717;
+      border-radius: 12px;
+      color: #171717;
+      background: #fff;
+      font-size: clamp(24px, 4vw, 38px);
+      font-weight: 1000;
+      letter-spacing: .5px;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .venue-label {
+      margin: -5px 0 0;
+      padding: 2px 18px;
+      color: #fff;
+      background: #171717;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%);
+    }
+
+    .parking-sign {
+      position: absolute;
+      top: 50%;
+      right: 3%;
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      transform: translateY(-50%);
+      border: 3px solid #171717;
+      border-radius: 9px;
+      color: #fff;
+      background: #171717;
+      box-shadow: inset 0 0 0 2px #fff;
+      font-size: 29px;
+      font-weight: 900;
+    }
+
+    .rates {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 13px;
+      width: min(78%, 410px);
+      padding: 7px 10px;
+      border-radius: 30px;
+      border: 2px solid #171717;
+      color: #171717;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .rate { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+    .rate + .rate { padding-left: 13px; border-left: 1px solid #777; }
+    .rate strong { padding: 4px 7px; border-radius: 16px; color: #fff; background: #171717; font-size: 11px; }
+    .validity { margin: 0; color: #171717; font-size: 11px; font-weight: 700; }
+
+    .serial {
+      position: absolute;
+      bottom: 10px;
+      left: 14px;
+      padding: 5px 9px;
+      border-radius: 7px;
+      color: #171717;
+      background: #fff;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .serial b { margin-left: 4px; color: #171717; letter-spacing: 1px; }
+
+    .ticket-stub {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 9px;
+      padding: 14px 12px 14px 18px;
+      border-left: 2px dashed #171717;
+      color: #171717;
+      background: #fff;
+    }
+    .stub-heading { margin: 0; text-align: center; font-size: 15px; font-weight: 900; line-height: 1.15; text-transform: uppercase; }
+    .stub-event { display: inline-block; margin-top: 3px; padding: 2px 9px; border-radius: 20px; color: #fff; background: #171717; }
+    .stub-venue { display: block; margin-top: 3px; font-size: 10px; letter-spacing: 1px; }
+    .stub-rate { display: flex; justify-content: space-between; gap: 6px; font-size: 11px; font-weight: 700; }
+    .stub-rate b { color: #171717; white-space: nowrap; }
+    .stub-rule { height: 1px; margin: 2px 0; background: #171717; }
+    .stub-number { padding: 6px 5px; border: 1px solid #171717; border-radius: 22px; text-align: center; font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .stub-number b { color: #171717; letter-spacing: .5px; }
+
+    .empty-state { padding: 54px 20px; border: 1px dashed #c6c6c6; border-radius: 12px; color: #717171; background: #fff; text-align: center; }
+    .empty-state[hidden] { display: none; }
+
+    @media (max-width: 760px) {
+      .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .controls button { width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      main { margin: 18px auto; padding: 0 12px; }
+      .app-header { padding: 22px 16px; }
+      .controls { grid-template-columns: 1fr 1fr; gap: 11px; padding: 14px; }
+      .ticket { grid-template-columns: minmax(0, 2.4fr) minmax(125px, 1fr); min-height: 165px; }
+      .ticket-main { gap: 7px; padding: 12px 8px 11px; }
+      .ticket-title { font-size: clamp(19px, 7vw, 29px); }
+      .venue-label { font-size: 10px; }
+      .parking-sign { right: 2%; width: 30px; height: 30px; font-size: 21px; }
+      .rates { width: 82%; gap: 7px; padding: 6px 5px; font-size: 10px; }
+      .rate { gap: 4px; }
+      .rate + .rate { padding-left: 7px; }
+      .rate strong { padding: 4px 5px; font-size: 9px; }
+      .ticket-stub { gap: 7px; padding: 10px 7px 10px 13px; }
+      .stub-heading { font-size: 12px; }
+      .stub-rate { font-size: 9px; }
+      .stub-number { padding: 5px 2px; font-size: 9px; }
+      .serial { bottom: 7px; left: 7px; padding: 4px 6px; font-size: 9px; }
+      .validity { font-size: 9px; }
+    }
+
+    @page { size: A4 portrait; margin: 8mm; }
+
+    @media print {
+      :root, body { background: #fff; }
+      .app-header, .controls, .status, .empty-state { display: none !important; }
+      main { max-width: none; margin: 0; padding: 0; }
+      .tickets { display: block; }
+      .ticket {
+        display: grid;
+        height: 61mm;
+        min-height: 0;
+        margin: 0 0 4mm;
+        border-radius: 2mm;
+        box-shadow: none;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .ticket-main { gap: 2mm; padding: 4mm 5mm 3mm; }
+      .event-label { font-size: 8pt; }
+      .ticket-title { font-size: 25pt; }
+      .venue-label { margin-top: -2mm; font-size: 9pt; }
+      .parking-sign { width: 12mm; height: 12mm; font-size: 9mm; }
+      .rates { width: 76%; padding: 2mm 3mm; font-size: 9pt; }
+      .rate strong { font-size: 8pt; }
+      .validity { font-size: 8pt; }
+      .serial { bottom: 3mm; left: 4mm; font-size: 9pt; }
+      .ticket-stub { gap: 3mm; padding: 4mm 4mm 4mm 6mm; }
+      .stub-heading { font-size: 12pt; }
+      .stub-venue { font-size: 8pt; }
+      .stub-rate { font-size: 9pt; }
+      .stub-number { font-size: 9pt; }
+      .ticket:nth-child(4n):not(:last-child) { break-after: page; page-break-after: always; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>Generator Karcis Parkir</h1>
+    <p>Buat karcis bernomor otomatis, lalu cetak langsung di kertas A4.</p>
+  </header>
+
+  <main>
+    <form class="controls" id="ticket-form">
+      <label>
+        Nama acara
+        <input id="event-name" name="event" value="Pasar Malam" maxlength="36" required>
+      </label>
+      <label>
+        Jumlah karcis
+        <input id="quantity" name="quantity" type="number" min="1" max="500" value="100" required>
+      </label>
+      <label>
+        Nomor awal
+        <input id="start-number" name="start" type="number" min="1" max="999999" value="1" required>
+      </label>
+      <button type="submit">Buat Karcis</button>
+      <button class="secondary" id="print-button" type="button">Cetak / Simpan PDF</button>
+    </form>
+
+    <p class="status" id="status" aria-live="polite"></p>
+    <div class="empty-state" id="empty-state" hidden>Belum ada karcis. Isi pengaturan di atas lalu pilih <strong>Buat Karcis</strong>.</div>
+    <section class="tickets" id="tickets" aria-label="Pratinjau karcis parkir"></section>
+  </main>
+
+  <template id="ticket-template">
+    <article class="ticket">
+      <div class="ticket-main">
+        <p class="event-label">Karcis Parkir</p>
+        <h2 class="ticket-title"></h2>
+        <div class="rates">
+          <span class="rate"><span>Motor</span><strong>Rp 2.000</strong></span>
+          <span class="rate"><span>Mobil</span><strong>Rp 5.000</strong></span>
+        </div>
+        <p class="validity">Berlaku 1 kali parkir di area Tidar Plindu</p>
+        <span class="serial">No. <b></b></span>
+        <span class="parking-sign" aria-hidden="true">P</span>
+      </div>
+      <aside class="ticket-stub">
+        <p class="stub-heading">Karcis Parkir<br><span class="stub-event"></span><span class="stub-venue">TIDAR PLINDU</span></p>
+        <div class="stub-rate"><span>Motor</span><b>Rp 2.000</b></div>
+        <div class="stub-rate"><span>Mobil</span><b>Rp 5.000</b></div>
+        <div class="stub-rule"></div>
+        <div class="stub-number">No. <b></b></div>
+      </aside>
+    </article>
+  </template>
+
+  <script>
+    const form = document.querySelector("#ticket-form");
+    const tickets = document.querySelector("#tickets");
+    const template = document.querySelector("#ticket-template");
+    const status = document.querySelector("#status");
+
+    function formatNumber(number) {
+      return String(number).padStart(6, "0");
+    }
+
+    function generateTickets(event) {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+
+      const quantity = Number(form.elements.quantity.value);
+      const startNumber = Number(form.elements.start.value);
+      const lastNumber = startNumber + quantity - 1;
+
+      if (quantity < 1 || quantity > 500) {
+        form.elements.quantity.setCustomValidity("Jumlah karcis harus antara 1 dan 500.");
+        form.elements.quantity.reportValidity();
+        form.elements.quantity.setCustomValidity("");
+        return;
+      }
+
+      if (lastNumber > 999999) {
+        form.elements.start.setCustomValidity("Rentang nomor karcis tidak boleh melebihi 999999.");
+        form.elements.start.reportValidity();
+        form.elements.start.setCustomValidity("");
+        return;
+      }
+
+      const eventName = form.elements.event.value.trim();
+      const fragment = document.createDocumentFragment();
+
+      for (let index = 0; index < quantity; index += 1) {
+        const number = formatNumber(startNumber + index);
+        const ticket = template.content.cloneNode(true);
+        ticket.querySelector(".ticket-title").textContent = eventName;
+        ticket.querySelector(".stub-event").textContent = eventName;
+        ticket.querySelector(".serial b").textContent = number;
+        ticket.querySelector(".stub-number b").textContent = number;
+        fragment.append(ticket);
+      }
+
+      tickets.replaceChildren(fragment);
+      document.querySelector("#empty-state").hidden = true;
+      const sheetCount = Math.ceil(quantity / 4);
+      status.textContent = `${quantity} karcis siap dicetak (No. ${formatNumber(startNumber)}–${formatNumber(lastNumber)}). A4 potret: 4 karcis per lembar, sekitar ${sheetCount} lembar.`;
+    }
+
+    form.addEventListener("submit", generateTickets);
+    document.querySelector("#print-button").addEventListener("click", () => {
+      if (!tickets.children.length) {
+        status.textContent = "Buat karcis terlebih dahulu sebelum mencetak.";
+        return;
+      }
+      window.print();
+    });
+
+    generateTickets(new Event("submit", { cancelable: true }));
+  </script>
+</body>
+</html>
